@@ -1,4 +1,4 @@
-<?php
+        <?php
         
         include('dbConnect.php');
  
@@ -30,7 +30,7 @@
         }
         
         ///echo $firstcount." ";///for testing
-        
+
         
         $prioritycode = 0;//use to keep track of which set of commands the ee goes through
         
@@ -46,6 +46,7 @@
             //pull ee number to test how many 
             $test = $data["ee"][$i];
 
+            ///echo $data["transfers_transfer_date"][$i]." ";
             
             //stop and do this process when ee no longer the same
             if ($test != $data["ee"][($i + 1)])
@@ -108,13 +109,15 @@
                         //loop through all the dates checking if less than and same priority
                         for ($x = 0; $x <= $count - 1; $x++)
                         {
+                            ///echo $holder["transdate"][$k]." ";
+                            
                             //if date less than other dates
-                            if ($holder["transdate"][$k] < $holder["transdate"][($x)] AND $holder["transfer"][($x)] == 'Transferred')   
+                            if ($holder["transdate"][$k] < $data["transfers_transfer_date"][($i - $x)] AND $data["transfers_transfer_status"][($i - $x)] == 'Transferred')   
                             {
                                 $holder["flag"][$k] = "Yes";
                             }
                         } 
-                        
+                        ///echo $holder["ee"][$k]." ";
                     }
                    
                     
@@ -149,20 +152,35 @@
                         $holder["transfer"][$k] = $data["transfers_transfer_status"][($i - $k)];
                         //echo "Outer ";
 
-                        //flag items that are not accepted or issued (not priority 2)
-                        if ($data["transfers_transfer_status"][($i - $k)] != 'Accepted' OR $data["transfers_transfer_status"][($i - $k)] != 'Issued')
+                        //flag items that are not accepted or issued (not priority 2) first check if accepted then issued
+                        if ($data["transfers_transfer_status"][($i - $k)] != 'Accepted')
                         {
-                            $holder["flag"][$k] = "Yes";
+                            if ($data["transfers_transfer_status"][($i - $k)] != 'Issued')
+                            {                      
+                                $holder["flag"][$k] = "Yes";
+                            }
+                            
                         }
                     
                         //loop through all the dates checking if less than and same priority
                         for ($x = 0; $x <= $count - 1; $x++)
                         {
-                            //if date less than other dates
-                            if ($holder["transdate"][$k] > $holder["transdate"][($x)] AND ($holder["transfer"][($x)] == 'Issued' OR $holder["transfer"][($x)] == 'Accepted'))   
+                            //if date less than other dates - had to use main array because holder array was not created on first go
+                            if ($holder["transdate"][$k] > $data["transfers_transfer_date"][($i - $x)] AND $data["transfers_transfer_status"][($i - $x)] == 'Accepted')   
                             {
                                 $holder["flag"][$k] = "Yes";
+                                ///echo " ACC ";
+                            }   
+                            else if ($holder["transdate"][$k] > $data["transfers_transfer_date"][($i - $x)] AND $data["transfers_transfer_status"][($i - $x)] == 'Issued' )   
+                            {
+                                $holder["flag"][$k] = "Yes";
+                                ///echo " ISS ";                                
                             }
+                            else
+                            {
+                                ///echo " NONE ";                                
+                            }
+                            
                         }
                         
                     }
